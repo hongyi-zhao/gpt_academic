@@ -1,3 +1,4 @@
+
 import importlib
 import time
 import inspect
@@ -10,6 +11,7 @@ import glob
 import logging
 import uuid
 from functools import wraps
+from textwrap import dedent
 from shared_utils.config_loader import get_conf
 from shared_utils.config_loader import set_conf
 from shared_utils.config_loader import set_multi_conf
@@ -90,7 +92,7 @@ def ArgsGeneralWrapper(f):
     """
     def decorated(request: gradio.Request, cookies:dict, max_length:int, llm_model:str,
                   txt:str, txt2:str, top_p:float, temperature:float, chatbot:list,
-                  history:list, system_prompt:str, plugin_advanced_arg:str, *args):
+                  history:list, system_prompt:str, plugin_advanced_arg:dict, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -114,9 +116,10 @@ def ArgsGeneralWrapper(f):
             'client_ip': request.client.host,
             'most_recent_uploaded': cookies.get('most_recent_uploaded')
         }
-        plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg,
-        }
+        if isinstance(plugin_advanced_arg, str):
+            plugin_kwargs = {"advanced_arg": plugin_advanced_arg}
+        else:
+            plugin_kwargs = plugin_advanced_arg
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
 
@@ -192,8 +195,19 @@ def trimmed_format_exc():
     replace_path = "."
     return str.replace(current_path, replace_path)
 
+
 def trimmed_format_exc_markdown():
     return '\n\n```\n' + trimmed_format_exc() + '```'
+
+
+class FriendlyException(Exception):
+    def generate_error_html(self):
+        return dedent(f"""
+            <div class="center-div" style="color: crimson;text-align: center;">
+                {"<br>".join(self.args)}
+            </div>
+        """)
+
 
 def CatchException(f):
     """
@@ -205,13 +219,19 @@ def CatchException(f):
                   chatbot_with_cookie:ChatBotWithCookies, history:list, *args, **kwargs):
         try:
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
+        except FriendlyException as e:
+            tb_str = '```\n' + trimmed_format_exc() + '```'
+            if len(chatbot_with_cookie) == 0:
+                chatbot_with_cookie.clear()
+                chatbot_with_cookie.append(["插件调度异常:\n" + tb_str, None])
+            chatbot_with_cookie[-1] = [chatbot_with_cookie[-1][0], e.generate_error_html()]
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常')  # 刷新界面
         except Exception as e:
-            from toolbox import get_conf
             tb_str = '```\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
-            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n")
+            chatbot_with_cookie[-1] = [chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n"]
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
 
     return decorated
@@ -547,8 +567,6 @@ def generate_file_link(report_files:List[str]):
     return file_links
 
 
-
-
 def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
     if "files_to_promote" in cookies:
         report_files = cookies["files_to_promote"]
@@ -562,7 +580,7 @@ def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookie
         file_links += (
             f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
         )
-    chatbot.append(["报告如何远程获取？", f"报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}"])
+    chatbot.append(["报告如何远程获取？", f"报告已经添加到右侧“文件下载区”（可能处于折叠状态），请查收。{file_links}"])
     return cookies, report_files, chatbot
 
 
@@ -902,15 +920,18 @@ def get_pictures_list(path):
     return file_manifest
 
 
-def have_any_recent_upload_image_files(chatbot:ChatBotWithCookies):
+def have_any_recent_upload_image_files(chatbot:ChatBotWithCookies, pop:bool=False):
     _5min = 5 * 60
     if chatbot is None:
         return False, None  # chatbot is None
-    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if pop:
+        most_recent_uploaded = chatbot._cookies.pop("most_recent_uploaded", None)
+    else:
+        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    # most_recent_uploaded 是一个放置最新上传图像的路径
     if not most_recent_uploaded:
         return False, None  # most_recent_uploaded is None
     if time.time() - most_recent_uploaded["time"] < _5min:
-        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
         path = most_recent_uploaded["path"]
         file_manifest = get_pictures_list(path)
         if len(file_manifest) == 0:

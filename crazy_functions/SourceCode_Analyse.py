@@ -1,12 +1,12 @@
-from toolbox import update_ui, promote_file_to_downloadzone, disable_auto_promotion
+from toolbox import update_ui, promote_file_to_downloadzone
 from toolbox import CatchException, report_exception, write_history_to_file
-from .crazy_utils import input_clipping
+from shared_utils.fastapi_server import validate_path_safety
+from crazy_functions.crazy_utils import input_clipping
 
 def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import os, copy
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-    disable_auto_promotion(chatbot=chatbot)
 
     summary_batch_isolation = True
     inputs_array = []
@@ -23,7 +23,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             file_content = f.read()
         prefix = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = prefix + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
-        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {fp}'
+        i_say_show_user = prefix + f'[{index+1}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {fp}'
         # 装载请求内容
         inputs_array.append(i_say)
         inputs_show_user_array.append(i_say_show_user)
@@ -128,6 +128,7 @@ def 解析一个Python项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -146,6 +147,7 @@ def 解析一个Matlab项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析Matlab项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -164,6 +166,7 @@ def 解析一个C项目的头文件(txt, llm_kwargs, plugin_kwargs, chatbot, his
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -184,6 +187,7 @@ def 解析一个C项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -206,6 +210,7 @@ def 解析一个Java项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
@@ -228,6 +233,7 @@ def 解析一个前端项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
@@ -257,6 +263,7 @@ def 解析一个Golang项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
@@ -278,6 +285,7 @@ def 解析一个Rust项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
@@ -298,6 +306,7 @@ def 解析一个Lua项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -320,6 +329,7 @@ def 解析一个CSharp项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -357,6 +367,7 @@ def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     import glob, os, re
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")

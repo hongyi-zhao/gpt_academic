@@ -1,33 +1,44 @@
 
-def check_proxy(proxies):
+def check_proxy(proxies, return_ip=False):
     import requests
     proxies_https = proxies['https'] if proxies is not None else '无'
+    ip = None
     try:
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         data = response.json()
         if 'country_name' in data:
             country = data['country_name']
             result = f"代理配置 {proxies_https}, 代理所在地：{country}"
+            if 'ip' in data: ip = data['ip']
         elif 'error' in data:
-            alternative = _check_with_backup_source(proxies)
+            alternative, ip = _check_with_backup_source(proxies)
             if alternative is None:
                 result = f"代理配置 {proxies_https}, 代理所在地：未知，IP查询频率受限"
             else:
                 result = f"代理配置 {proxies_https}, 代理所在地：{alternative}"
         else:
             result = f"代理配置 {proxies_https}, 代理数据解析失败：{data}"
-        print(result)
-        return result
+        if not return_ip:
+            print(result)
+            return result
+        else:
+            return ip
     except:
         result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
-        print(result)
-        return result
+        if not return_ip:
+            print(result)
+            return result
+        else:
+            return ip
 
 def _check_with_backup_source(proxies):
     import random, string, requests
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
-    try: return requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()['dns']['geo']
-    except: return None
+    try:
+        res_json = requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()
+        return res_json['dns']['geo'], res_json['dns']['ip']
+    except:
+        return None, None
 
 def backup_and_download(current_version, remote_version):
     """
@@ -71,7 +82,7 @@ def patch_and_restart(path):
     import sys
     import time
     import glob
-    from colorful import print亮黄, print亮绿, print亮红
+    from shared_utils.colorful import print亮黄, print亮绿, print亮红
     # if not using config_private, move origin config.py as config_private.py
     if not os.path.exists('config_private.py'):
         print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
@@ -124,7 +135,7 @@ def auto_update(raise_error=False):
             current_version = f.read()
             current_version = json.loads(current_version)['version']
         if (remote_version - current_version) >= 0.01-1e-5:
-            from colorful import print亮黄
+            from shared_utils.colorful import print亮黄
             print亮黄(f'\n新版本可用。新版本:{remote_version}，当前版本:{current_version}。{new_feature}')
             print('（1）Github更新地址:\nhttps://github.com/binary-husky/chatgpt_academic\n')
             user_instruction = input('（2）是否一键更新代码（Y+回车=确认，输入其他/无输入+回车=不更新）？')

@@ -1,3 +1,6 @@
+// 标志位
+enable_tts = false;
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 1 部分: 工具函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -831,39 +834,44 @@ function limit_scroll_position() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function loadLive2D() {
-    try {
-        $("<link>").attr({ href: "file=themes/waifu_plugin/waifu.css", rel: "stylesheet", type: "text/css" }).appendTo('head');
-        $('body').append('<div class="waifu"><div class="waifu-tips"></div><canvas id="live2d" class="live2d"></canvas><div class="waifu-tool"><span class="fui-home"></span> <span class="fui-chat"></span> <span class="fui-eye"></span> <span class="fui-user"></span> <span class="fui-photo"></span> <span class="fui-info-circle"></span> <span class="fui-cross"></span></div></div>');
-        $.ajax({
-            url: "file=themes/waifu_plugin/waifu-tips.js", dataType: "script", cache: true, success: function () {
-                $.ajax({
-                    url: "file=themes/waifu_plugin/live2d.js", dataType: "script", cache: true, success: function () {
-                        /* 可直接修改部分参数 */
-                        live2d_settings['hitokotoAPI'] = "hitokoto.cn";  // 一言 API
-                        live2d_settings['modelId'] = 3;                  // 默认模型 ID
-                        live2d_settings['modelTexturesId'] = 44;          // 默认材质 ID
-                        live2d_settings['modelStorage'] = false;         // 不储存模型 ID
-                        live2d_settings['waifuSize'] = '210x187';
-                        live2d_settings['waifuTipsSize'] = '187x52';
-                        live2d_settings['canSwitchModel'] = true;
-                        live2d_settings['canSwitchTextures'] = true;
-                        live2d_settings['canSwitchHitokoto'] = false;
-                        live2d_settings['canTakeScreenshot'] = false;
-                        live2d_settings['canTurnToHomePage'] = false;
-                        live2d_settings['canTurnToAboutPage'] = false;
-                        live2d_settings['showHitokoto'] = false;          // 显示一言
-                        live2d_settings['showF12Status'] = false;         // 显示加载状态
-                        live2d_settings['showF12Message'] = false;        // 显示看板娘消息
-                        live2d_settings['showF12OpenMsg'] = false;        // 显示控制台打开提示
-                        live2d_settings['showCopyMessage'] = false;       // 显示 复制内容 提示
-                        live2d_settings['showWelcomeMessage'] = true;     // 显示进入面页欢迎词
-                        /* 在 initModel 前添加 */
-                        initModel("file=themes/waifu_plugin/waifu-tips.json");
-                    }
-                });
-            }
-        });
-    } catch (err) { console.log("[Error] JQuery is not defined.") }
+    if (document.querySelector(".waifu") )
+    {
+        $('.waifu').show();
+    } else {
+        try {
+            $("<link>").attr({ href: "file=themes/waifu_plugin/waifu.css", rel: "stylesheet", type: "text/css" }).appendTo('head');
+            $('body').append('<div class="waifu"><div class="waifu-tips"></div><canvas id="live2d" class="live2d"></canvas><div class="waifu-tool"><span class="fui-home"></span> <span class="fui-chat"></span> <span class="fui-eye"></span> <span class="fui-user"></span> <span class="fui-photo"></span> <span class="fui-info-circle"></span> <span class="fui-cross"></span></div></div>');
+            $.ajax({
+                url: "file=themes/waifu_plugin/waifu-tips.js", dataType: "script", cache: true, success: function () {
+                    $.ajax({
+                        url: "file=themes/waifu_plugin/live2d.js", dataType: "script", cache: true, success: function () {
+                            /* 可直接修改部分参数 */
+                            live2d_settings['hitokotoAPI'] = "hitokoto.cn";  // 一言 API
+                            live2d_settings['modelId'] = 3;                  // 默认模型 ID
+                            live2d_settings['modelTexturesId'] = 44;          // 默认材质 ID
+                            live2d_settings['modelStorage'] = false;         // 不储存模型 ID
+                            live2d_settings['waifuSize'] = '210x187';
+                            live2d_settings['waifuTipsSize'] = '187x52';
+                            live2d_settings['canSwitchModel'] = true;
+                            live2d_settings['canSwitchTextures'] = true;
+                            live2d_settings['canSwitchHitokoto'] = false;
+                            live2d_settings['canTakeScreenshot'] = false;
+                            live2d_settings['canTurnToHomePage'] = false;
+                            live2d_settings['canTurnToAboutPage'] = false;
+                            live2d_settings['showHitokoto'] = false;          // 显示一言
+                            live2d_settings['showF12Status'] = false;         // 显示加载状态
+                            live2d_settings['showF12Message'] = false;        // 显示看板娘消息
+                            live2d_settings['showF12OpenMsg'] = false;        // 显示控制台打开提示
+                            live2d_settings['showCopyMessage'] = false;       // 显示 复制内容 提示
+                            live2d_settings['showWelcomeMessage'] = true;     // 显示进入面页欢迎词
+                            /* 在 initModel 前添加 */
+                            initModel("file=themes/waifu_plugin/waifu-tips.json");
+                        }
+                    });
+                }
+            });
+        } catch (err) { console.log("[Error] JQuery is not defined.") }
+    }
 }
 
 
@@ -907,131 +915,6 @@ function gpt_academic_gradio_saveload(
     if (save_or_load === "save") {
         setCookie(cookie_key, save_value, 365);
     }
-}
-
-enable_tts = false;
-async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
-    // 第一部分，布局初始化
-    audio_fn_init();
-    minor_ui_adjustment();
-    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
-    var chatbotObserver = new MutationObserver(() => {
-        chatbotContentChanged(1);
-    });
-    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
-    if (layout === "LEFT-RIGHT") { chatbotAutoHeight(); }
-    if (layout === "LEFT-RIGHT") { limit_scroll_position(); }
-
-    // 第二部分，读取Cookie，初始话界面
-    let searchString = "";
-    let bool_value = "";
-    //  darkmode 深色模式
-    if (getCookie("js_darkmode_cookie")) {
-        dark = getCookie("js_darkmode_cookie")
-    }
-    dark = dark == "True";
-    if (document.querySelectorAll('.dark').length) {
-        if (!dark) {
-            document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-        }
-    } else {
-        if (dark) {
-            document.querySelector('body').classList.add('dark');
-        }
-    }
-
-    //  自动朗读
-    if (tts != "DISABLE"){
-        enable_tts = true;
-        if (getCookie("js_auto_read_cookie")) {
-            auto_read_tts = getCookie("js_auto_read_cookie")
-            auto_read_tts = auto_read_tts == "True";
-            if (auto_read_tts) {
-                allow_auto_read_tts_flag = true;
-            }
-        }
-    }
-
-    // SysPrompt 系统静默提示词
-    gpt_academic_gradio_saveload("load", "elem_prompt", "js_system_prompt_cookie", null, "str");
-    // Temperature 大模型温度参数
-    gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
-    // md_dropdown 大模型类型选择
-    if (getCookie("js_md_dropdown_cookie")) {
-        const cached_model = getCookie("js_md_dropdown_cookie");
-        var model_sel = await get_gradio_component("elem_model_sel");
-        // deterine whether the cached model is in the choices
-        if (model_sel.props.choices.includes(cached_model)){
-            // change dropdown
-            gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
-            // 连锁修改chatbot的label
-            push_data_to_gradio_component({
-                label: '当前模型：' + getCookie("js_md_dropdown_cookie"),
-                __type__: 'update'
-            }, "gpt-chatbot", "obj")
-        }
-    }
-
-
-
-    // clearButton 自动清除按钮
-    if (getCookie("js_clearbtn_show_cookie")) {
-        // have cookie
-        bool_value = getCookie("js_clearbtn_show_cookie")
-        bool_value = bool_value == "True";
-        searchString = "输入清除键";
-
-        if (bool_value) {
-            // make btns appear
-            let clearButton = document.getElementById("elem_clear"); clearButton.style.display = "block";
-            let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "block";
-            // deal with checkboxes
-            let arr_with_clear_btn = update_array(
-                await get_data_from_gradio_component('cbs'), "输入清除键", "add"
-            )
-            push_data_to_gradio_component(arr_with_clear_btn, "cbs", "no_conversion");
-        } else {
-            // make btns disappear
-            let clearButton = document.getElementById("elem_clear"); clearButton.style.display = "none";
-            let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "none";
-            // deal with checkboxes
-            let arr_without_clear_btn = update_array(
-                await get_data_from_gradio_component('cbs'), "输入清除键", "remove"
-            )
-            push_data_to_gradio_component(arr_without_clear_btn, "cbs", "no_conversion");
-        }
-    }
-
-    // live2d 显示
-    if (getCookie("js_live2d_show_cookie")) {
-        // have cookie
-        searchString = "添加Live2D形象";
-        bool_value = getCookie("js_live2d_show_cookie");
-        bool_value = bool_value == "True";
-        if (bool_value) {
-            loadLive2D();
-            let arr_with_live2d = update_array(
-                await get_data_from_gradio_component('cbsc'), "添加Live2D形象", "add"
-            )
-            push_data_to_gradio_component(arr_with_live2d, "cbsc", "no_conversion");
-        } else {
-            try {
-                $('.waifu').hide();
-                let arr_without_live2d = update_array(
-                    await get_data_from_gradio_component('cbsc'), "添加Live2D形象", "remove"
-                )
-                push_data_to_gradio_component(arr_without_live2d, "cbsc", "no_conversion");
-            } catch (error) {
-            }
-        }
-    } else {
-        // do not have cookie
-        if (live2d) {
-            loadLive2D();
-        } else {
-        }
-    }
-
 }
 
 
@@ -1525,17 +1408,266 @@ async function postData(url = '', data = {}) {
     }
 }
 
+async function generate_menu(guiBase64String, btnName){
+    // assign the button and menu data
+    push_data_to_gradio_component(guiBase64String, "invisible_current_pop_up_plugin_arg", "string");
+    push_data_to_gradio_component(btnName, "invisible_callback_btn_for_plugin_exe", "string");
+
+    // Base64 to dict
+    const stringData = atob(guiBase64String);
+    let guiJsonData = JSON.parse(stringData);
+    let menu = document.getElementById("plugin_arg_menu");
+    gui_args = {}
+    for (const key in guiJsonData) {
+        if (guiJsonData.hasOwnProperty(key)) {
+            const innerJSONString = guiJsonData[key];
+            const decodedObject = JSON.parse(innerJSONString);
+            gui_args[key] = decodedObject;
+        }
+    }
+
+    // 使参数菜单显现
+    push_data_to_gradio_component({
+        visible: true,
+        __type__: 'update'
+    }, "plugin_arg_menu", "obj");
+    hide_all_elem();
+    // 根据 gui_args, 使得对应参数项显现
+    let text_cnt = 0;
+    let dropdown_cnt = 0;
+    // PLUGIN_ARG_MENU
+    for (const key in gui_args) {
+        if (gui_args.hasOwnProperty(key)) {
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////    Textbox   ////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            if (gui_args[key].type=='string'){ // PLUGIN_ARG_MENU
+                const component_name = "plugin_arg_txt_" + text_cnt;
+                push_data_to_gradio_component({
+                    visible: true,
+                    label: gui_args[key].title + "(" + gui_args[key].description +  ")",
+                    // label: gui_args[key].title,
+                    placeholder: gui_args[key].description,
+                    __type__: 'update'
+                }, component_name, "obj");
+                if (key === "main_input"){
+                    // 为了与旧插件兼容，生成菜单时，自动加载输入栏的值
+                    let current_main_input = await get_data_from_gradio_component('user_input_main');
+                    let current_main_input_2 = await get_data_from_gradio_component('user_input_float');
+                    push_data_to_gradio_component(current_main_input + current_main_input_2, component_name, "obj");
+                }
+                else if (key === "advanced_arg"){
+                    // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
+                    let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
+                    push_data_to_gradio_component(advance_arg_input_legacy, component_name, "obj");
+                }
+                else {
+                    push_data_to_gradio_component(gui_args[key].default_value, component_name, "obj");
+                }
+                document.getElementById(component_name).parentNode.parentNode.style.display = '';
+                text_cnt += 1;
+            }
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////    Dropdown   ////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            if (gui_args[key].type=='dropdown'){ // PLUGIN_ARG_MENU
+                const component_name = "plugin_arg_drop_" + dropdown_cnt;
+                push_data_to_gradio_component({
+                    visible: true,
+                    choices: gui_args[key].options,
+                    label: gui_args[key].title + "(" + gui_args[key].description +  ")",
+                    // label: gui_args[key].title,
+                    placeholder: gui_args[key].description,
+                    __type__: 'update'
+                }, component_name, "obj");
+                push_data_to_gradio_component(gui_args[key].default_value, component_name, "obj");
+                document.getElementById(component_name).parentNode.style.display = '';
+                dropdown_cnt += 1;
+            }
 
 
+        }
+    }
+}
+
+async function execute_current_pop_up_plugin(){
+    let guiBase64String = await get_data_from_gradio_component('invisible_current_pop_up_plugin_arg');
+    const stringData = atob(guiBase64String);
+    let guiJsonData = JSON.parse(stringData);
+    gui_args = {}
+    for (const key in guiJsonData) {
+        if (guiJsonData.hasOwnProperty(key)) {
+            const innerJSONString = guiJsonData[key];
+            const decodedObject = JSON.parse(innerJSONString);
+            gui_args[key] = decodedObject;
+        }
+    }
+    // read user confirmed value
+    let text_cnt = 0;
+    for (const key in gui_args) {
+        if (gui_args.hasOwnProperty(key)) {
+            if (gui_args[key].type=='string'){ // PLUGIN_ARG_MENU
+                corrisponding_elem_id = "plugin_arg_txt_"+text_cnt
+                gui_args[key].user_confirmed_value = await get_data_from_gradio_component(corrisponding_elem_id);
+                text_cnt += 1;
+            }
+        }
+    }
+    let dropdown_cnt = 0;
+    for (const key in gui_args) {
+        if (gui_args.hasOwnProperty(key)) {
+            if (gui_args[key].type=='dropdown'){ // PLUGIN_ARG_MENU
+                corrisponding_elem_id = "plugin_arg_drop_"+dropdown_cnt
+                gui_args[key].user_confirmed_value = await get_data_from_gradio_component(corrisponding_elem_id);
+                dropdown_cnt += 1;
+            }
+        }
+    }
+    // close menu
+    push_data_to_gradio_component({
+        visible: false,
+        __type__: 'update'
+    }, "plugin_arg_menu", "obj");
+    hide_all_elem();
+
+    // execute the plugin
+    push_data_to_gradio_component(JSON.stringify(gui_args), "invisible_current_pop_up_plugin_arg_final", "string");
+    document.getElementById("invisible_callback_btn_for_plugin_exe").click();
+
+}
+
+function hide_all_elem(){
+     // PLUGIN_ARG_MENU
+    for (text_cnt = 0; text_cnt < 8; text_cnt++){
+        push_data_to_gradio_component({
+            visible: false,
+            label: "",
+            __type__: 'update'
+        }, "plugin_arg_txt_"+text_cnt, "obj");
+        document.getElementById("plugin_arg_txt_"+text_cnt).parentNode.parentNode.style.display = 'none';
+    }
+    for (dropdown_cnt = 0; dropdown_cnt < 8; dropdown_cnt++){
+        push_data_to_gradio_component({
+            visible: false,
+            choices: [],
+            label: "",
+            __type__: 'update'
+        }, "plugin_arg_drop_"+dropdown_cnt, "obj");
+        document.getElementById("plugin_arg_drop_"+dropdown_cnt).parentNode.style.display = 'none';
+    }
+}
+
+function close_current_pop_up_plugin(){
+     // PLUGIN_ARG_MENU
+    push_data_to_gradio_component({
+        visible: false,
+        __type__: 'update'
+    }, "plugin_arg_menu", "obj");
+    hide_all_elem();
+}
 
 
+// 生成高级插件的选择菜单
+plugin_init_info_lib = {}
+function register_plugin_init(key, base64String){
+    // console.log('x')
+    const stringData = atob(base64String);
+    let guiJsonData = JSON.parse(stringData);
+    if (key in plugin_init_info_lib)
+    {
+    }
+    else
+    {
+        plugin_init_info_lib[key] = {};
+    }
+    plugin_init_info_lib[key].info = guiJsonData.Info;
+    plugin_init_info_lib[key].color = guiJsonData.Color;
+    plugin_init_info_lib[key].elem_id = guiJsonData.ButtonElemId;
+    plugin_init_info_lib[key].label = guiJsonData.Label
+    plugin_init_info_lib[key].enable_advanced_arg = guiJsonData.AdvancedArgs;
+    plugin_init_info_lib[key].arg_reminder = guiJsonData.ArgsReminder;
+}
+function register_advanced_plugin_init_code(key, code){
+    if (key in plugin_init_info_lib)
+    {
+    }
+    else
+    {
+        plugin_init_info_lib[key] = {};
+    }
+    plugin_init_info_lib[key].secondary_menu_code = code;
+}
+function run_advanced_plugin_launch_code(key){
+    // convert js code string to function
+    generate_menu(plugin_init_info_lib[key].secondary_menu_code, key);
+}
+function on_flex_button_click(key){
+    if (plugin_init_info_lib.hasOwnProperty(key) && plugin_init_info_lib[key].hasOwnProperty('secondary_menu_code')){
+        run_advanced_plugin_launch_code(key);
+    }else{
+        document.getElementById("old_callback_btn_for_plugin_exe").click();
+    }
+}
+async function run_dropdown_shift(dropdown){
+    let key = dropdown;
+    push_data_to_gradio_component({
+        value: key,
+        variant: plugin_init_info_lib[key].color,
+        info_str: plugin_init_info_lib[key].info,
+        __type__: 'update'
+    }, "elem_switchy_bt", "obj");
 
+    if (plugin_init_info_lib[key].enable_advanced_arg){
+        push_data_to_gradio_component({
+            visible: true,
+            label: plugin_init_info_lib[key].label,
+            __type__: 'update'
+        }, "advance_arg_input_legacy", "obj");
+    } else {
+        push_data_to_gradio_component({
+            visible: false,
+            label: plugin_init_info_lib[key].label,
+            __type__: 'update'
+        }, "advance_arg_input_legacy", "obj");
+    }
+}
 
+async function duplicate_in_new_window() {
+    // 获取当前页面的URL
+    var url = window.location.href;
+    // 在新标签页中打开这个URL
+    window.open(url, '_blank');
+}
 
+async function run_classic_plugin_via_id(plugin_elem_id){
+    // find elementid
+    for (key in plugin_init_info_lib){
+        if (plugin_init_info_lib[key].elem_id == plugin_elem_id){
+            let current_btn_name = await get_data_from_gradio_component(plugin_elem_id);
+            console.log(current_btn_name);
 
-
-
-
-
-
-
+            gui_args = {}
+            // 关闭菜单 (如果处于开启状态)
+            push_data_to_gradio_component({
+                visible: false,
+                __type__: 'update'
+            }, "plugin_arg_menu", "obj");
+            hide_all_elem();
+            // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
+            let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
+            if (advance_arg_input_legacy.length != 0){
+                gui_args["advanced_arg"] = {};
+                gui_args["advanced_arg"].user_confirmed_value = advance_arg_input_legacy;
+            }
+            // execute the plugin
+            push_data_to_gradio_component(JSON.stringify(gui_args), "invisible_current_pop_up_plugin_arg_final", "string");
+            push_data_to_gradio_component(current_btn_name, "invisible_callback_btn_for_plugin_exe", "string");
+            document.getElementById("invisible_callback_btn_for_plugin_exe").click();
+            return;
+        }
+    }
+    // console.log('unable to find function');
+    return;
+}

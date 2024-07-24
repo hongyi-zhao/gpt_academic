@@ -5,42 +5,56 @@ from toolbox import trimmed_format_exc
 def get_crazy_functions():
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
-    from crazy_functions.解析项目源代码 import 解析项目本身
-    from crazy_functions.解析项目源代码 import 解析一个Python项目
-    from crazy_functions.解析项目源代码 import 解析一个Matlab项目
-    from crazy_functions.解析项目源代码 import 解析一个C项目的头文件
-    from crazy_functions.解析项目源代码 import 解析一个C项目
-    from crazy_functions.解析项目源代码 import 解析一个Golang项目
-    from crazy_functions.解析项目源代码 import 解析一个Rust项目
-    from crazy_functions.解析项目源代码 import 解析一个Java项目
-    from crazy_functions.解析项目源代码 import 解析一个前端项目
+    from crazy_functions.SourceCode_Analyse import 解析项目本身
+    from crazy_functions.SourceCode_Analyse import 解析一个Python项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Matlab项目
+    from crazy_functions.SourceCode_Analyse import 解析一个C项目的头文件
+    from crazy_functions.SourceCode_Analyse import 解析一个C项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Golang项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Rust项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Java项目
+    from crazy_functions.SourceCode_Analyse import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
+    from crazy_functions.高级功能函数模板 import Demo_Wrap
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
-    from crazy_functions.解析项目源代码 import 解析一个Lua项目
-    from crazy_functions.解析项目源代码 import 解析一个CSharp项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
+    from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
-    from crazy_functions.对话历史存档 import 对话历史存档
-    from crazy_functions.对话历史存档 import 载入对话历史存档
-    from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
+    from crazy_functions.Conversation_To_File import 载入对话历史存档
+    from crazy_functions.Conversation_To_File import 对话历史存档
+    from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
+    from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
-    from crazy_functions.批量Markdown翻译 import Markdown英译中
+    from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
-    from crazy_functions.PDF批量翻译 import 批量翻译PDF文档
+    from crazy_functions.PDF_Translate import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
     from crazy_functions.Latex全文润色 import Latex英文纠错
-    from crazy_functions.批量Markdown翻译 import Markdown中译英
+    from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
-    from crazy_functions.生成多种Mermaid图表 import 生成多种Mermaid图表
+    from crazy_functions.生成多种Mermaid图表 import Mermaid_Gen
+    from crazy_functions.PDF_Translate_Wrap import PDF_Tran
+    from crazy_functions.Latex_Function import Latex英文纠错加PDF对比
+    from crazy_functions.Latex_Function import Latex翻译中文并重新编译PDF
+    from crazy_functions.Latex_Function import PDF翻译中文并重新编译PDF
+    from crazy_functions.Latex_Function_Wrap import Arxiv_Localize
+    from crazy_functions.Latex_Function_Wrap import PDF_Localize
+    from crazy_functions.Internet_GPT import 连接网络回答问题
+    from crazy_functions.Internet_GPT_Wrap import NetworkGPT_Wrap
+    from crazy_functions.Image_Generate import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
+    from crazy_functions.Image_Generate_Wrap import ImageGen_Wrap
+    from crazy_functions.SourceCode_Comment import 注释Python项目
 
     function_plugins = {
         "虚空终端": {
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",
             "AsButton": True,
+            "Info": "使用自然语言实现您的想法",
             "Function": HotReload(虚空终端),
         },
         "解析整个Python项目": {
@@ -49,6 +63,13 @@ def get_crazy_functions():
             "AsButton": True,
             "Info": "解析一个Python项目的所有源文件(.py) | 输入参数为路径",
             "Function": HotReload(解析一个Python项目),
+        },
+        "注释Python项目": {
+            "Group": "编程",
+            "Color": "stop",
+            "AsButton": False,
+            "Info": "上传一系列python源文件(或者压缩包), 为这些代码添加docstring | 输入参数为路径",
+            "Function": HotReload(注释Python项目),
         },
         "载入对话历史存档（先上传存档或输入路径）": {
             "Group": "对话",
@@ -75,14 +96,21 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,
             "Info" : "基于当前对话或文件生成多种Mermaid图表,图表类型由模型判断",
-            "Function": HotReload(生成多种Mermaid图表),
-            "AdvancedArgs": True,
-            "ArgsReminder": "请输入图类型对应的数字,不输入则为模型自行判断:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图,9-思维导图",
+            "Function": None,
+            "Class": Mermaid_Gen
+        },
+        "Arxiv论文翻译": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": True,
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
         "批量总结Word文档": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": True,
+            "AsButton": False,
             "Info": "批量总结word文档 | 输入参数为路径",
             "Function": HotReload(总结word文档),
         },
@@ -188,28 +216,42 @@ def get_crazy_functions():
         },
         "保存当前的对话": {
             "Group": "对话",
+            "Color": "stop",
             "AsButton": True,
             "Info": "保存当前的对话 | 不需要输入参数",
-            "Function": HotReload(对话历史存档),
+            "Function": HotReload(对话历史存档),    # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Conversation_To_File_Wrap     # 新一代插件需要注册Class
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
             "Group": "对话|编程",
+            "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "多线程解析并翻译此项目的源码 | 不需要输入参数",
             "Function": HotReload(解析项目本身),
         },
+        "查互联网后回答": {
+            "Group": "对话",
+            "Color": "stop",
+            "AsButton": True,  # 加入下拉菜单中
+            # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
+            "Function": HotReload(连接网络回答问题),
+            "Class": NetworkGPT_Wrap     # 新一代插件需要注册Class
+        },
         "历史上的今天": {
             "Group": "对话",
-            "AsButton": True,
+            "Color": "stop",
+            "AsButton": False,
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
-            "Function": HotReload(高阶功能模板函数),
+            "Function": None,
+            "Class": Demo_Wrap, # 新一代插件需要注册Class
         },
         "精准翻译PDF论文": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": True,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
-            "Function": HotReload(批量翻译PDF文档),
+            "Function": HotReload(批量翻译PDF文档), # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": PDF_Tran,  # 新一代插件需要注册Class
         },
         "询问多个GPT模型": {
             "Group": "对话",
@@ -284,7 +326,84 @@ def get_crazy_functions():
             "Info": "批量将Markdown文件中文翻译为英文 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Markdown中译英),
         },
+        "Latex英文纠错+高亮修正位置 [需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
+            "Function": HotReload(Latex英文纠错加PDF对比),
+        },
+        "📚Arxiv论文精细翻译（输入arxivID）[需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Arxiv_Localize,    # 新一代插件需要注册Class
+        },
+        "📚本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "本地Latex论文精细翻译 | 输入参数是路径",
+            "Function": HotReload(Latex翻译中文并重新编译PDF),
+        },
+        "PDF翻译中文并重新编译PDF（上传PDF）[需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
+            "Function": HotReload(PDF翻译中文并重新编译PDF),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": PDF_Localize   # 新一代插件需要注册Class
+        }
     }
+
+    function_plugins.update(
+        {
+            "🎨图片生成（DALLE2/DALLE3, 使用前切换到GPT系列模型）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "Info": "使用 DALLE2/DALLE3 生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE2),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+                "Class": ImageGen_Wrap  # 新一代插件需要注册Class
+            },
+        }
+    )
+
+    function_plugins.update(
+        {
+            "🎨图片修改_DALLE2 （使用前请切换模型到GPT系列）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
+                # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片修改_DALLE2),
+            },
+        }
+    )
+
+
+
+
+
+
+
+
 
     # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
     try:
@@ -305,39 +424,39 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print("Load function plugin failed")
 
+    # try:
+    #     from crazy_functions.联网的ChatGPT import 连接网络回答问题
+
+    #     function_plugins.update(
+    #         {
+    #             "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
+    #                 "Group": "对话",
+    #                 "Color": "stop",
+    #                 "AsButton": False,  # 加入下拉菜单中
+    #                 # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
+    #                 "Function": HotReload(连接网络回答问题),
+    #             }
+    #         }
+    #     )
+    #     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
+
+    #     function_plugins.update(
+    #         {
+    #             "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
+    #                 "Group": "对话",
+    #                 "Color": "stop",
+    #                 "AsButton": False,  # 加入下拉菜单中
+    #                 "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
+    #                 "Function": HotReload(连接bing搜索回答问题),
+    #             }
+    #         }
+    #     )
+    # except:
+    #     print(trimmed_format_exc())
+    #     print("Load function plugin failed")
+
     try:
-        from crazy_functions.联网的ChatGPT import 连接网络回答问题
-
-        function_plugins.update(
-            {
-                "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,  # 加入下拉菜单中
-                    # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
-                    "Function": HotReload(连接网络回答问题),
-                }
-            }
-        )
-        from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
-
-        function_plugins.update(
-            {
-                "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,  # 加入下拉菜单中
-                    "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
-                    "Function": HotReload(连接bing搜索回答问题),
-                }
-            }
-        )
-    except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
-
-    try:
-        from crazy_functions.解析项目源代码 import 解析任意code项目
+        from crazy_functions.SourceCode_Analyse import 解析任意code项目
 
         function_plugins.update(
             {
@@ -374,50 +493,7 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print("Load function plugin failed")
 
-    try:
-        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
 
-        function_plugins.update(
-            {
-                "图片生成_DALLE2 （先切换模型到gpt-*）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                    "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 256x256, 512x512, 1024x1024",  # 高级参数输入区的显示提示
-                    "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
-                    "Function": HotReload(图片生成_DALLE2),
-                },
-            }
-        )
-        function_plugins.update(
-            {
-                "图片生成_DALLE3 （先切换模型到gpt-*）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                    "ArgsReminder": "在这里输入自定义参数「分辨率-质量(可选)-风格(可选)」, 参数示例「1024x1024-hd-vivid」 || 分辨率支持 「1024x1024」(默认) /「1792x1024」/「1024x1792」 || 质量支持 「-standard」(默认) /「-hd」 || 风格支持 「-vivid」(默认) /「-natural」",  # 高级参数输入区的显示提示
-                    "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
-                    "Function": HotReload(图片生成_DALLE3),
-                },
-            }
-        )
-        function_plugins.update(
-            {
-                "图片修改_DALLE2 （先切换模型到gpt-*）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
-                    # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
-                    "Function": HotReload(图片修改_DALLE2),
-                },
-            }
-        )
-    except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
 
     try:
         from crazy_functions.总结音视频 import 总结音视频
@@ -458,7 +534,7 @@ def get_crazy_functions():
         print("Load function plugin failed")
 
     try:
-        from crazy_functions.批量Markdown翻译 import Markdown翻译指定语言
+        from crazy_functions.Markdown_Translate import Markdown翻译指定语言
 
         function_plugins.update(
             {
@@ -531,59 +607,6 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print("Load function plugin failed")
 
-    try:
-        from crazy_functions.Latex输出PDF import Latex英文纠错加PDF对比
-        from crazy_functions.Latex输出PDF import Latex翻译中文并重新编译PDF
-        from crazy_functions.Latex输出PDF import PDF翻译中文并重新编译PDF
-
-        function_plugins.update(
-            {
-                "Latex英文纠错+高亮修正位置 [需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
-                    "Function": HotReload(Latex英文纠错加PDF对比),
-                },
-                "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-                    "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
-                    "Function": HotReload(Latex翻译中文并重新编译PDF),
-                },
-                "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-                    "Info": "本地Latex论文精细翻译 | 输入参数是路径",
-                    "Function": HotReload(Latex翻译中文并重新编译PDF),
-                },
-                "PDF翻译中文并重新编译PDF（上传PDF）[需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-                    "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
-                    "Function": HotReload(PDF翻译中文并重新编译PDF)
-                }
-            }
-        )
-    except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
 
     try:
         from toolbox import get_conf

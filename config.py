@@ -33,7 +33,7 @@ else:
 # [step 3]>> 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
-                    "gpt-4o", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
+                    "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-pro", "chatglm3"
@@ -41,14 +41,16 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
 # AVAIL_LLM_MODELS = [
+#   "glm-4-0520", "glm-4-air", "glm-4-airx", "glm-4-flash",
 #   "qianfan", "deepseekcoder",
-#   "spark", "sparkv2", "sparkv3", "sparkv3.5",
+#   "spark", "sparkv2", "sparkv3", "sparkv3.5", "sparkv4",
 #   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",
 #   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"
 #   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
 #   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
-#   "yi-34b-chat-0205", "yi-34b-chat-200k"
+#   "deepseek-chat" ,"deepseek-coder",
+#   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama时，
@@ -133,7 +135,7 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 # 百度千帆（LLM_MODEL="qianfan"）
 BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat", "ERNIE-Speed-128K", "ERNIE-Speed-8K", "ERNIE-Lite-8K"
 
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
@@ -201,7 +203,7 @@ ALIYUN_SECRET=""    # （无需填写）
 
 
 # GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
-TTS_TYPE = "DISABLE" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
+TTS_TYPE = "EDGE_TTS" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
 GPT_SOVITS_URL = ""
 EDGE_TTS_VOICE = "zh-CN-XiaoxiaoNeural"
 
@@ -227,6 +229,14 @@ MOONSHOT_API_KEY = ""
 
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
+
+
+# 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = ""
+
+
+# 紫东太初大模型 https://ai-maas.wair.ac.cn
+TAICHU_API_KEY = ""
 
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
@@ -259,6 +269,10 @@ GROBID_URLS = [
 ]
 
 
+# Searxng互联网检索服务
+SEARXNG_URL = "https://cloud-1.agent-matrix.com/"
+
+
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
 
@@ -267,21 +281,21 @@ ALLOW_RESET_CONFIG = False
 AUTOGEN_USE_DOCKER = False
 
 
-# 临时的上传文件夹位置，请勿修改
+# 临时的上传文件夹位置，请尽量不要修改
 PATH_PRIVATE_UPLOAD = "private_upload"
 
 
-# 日志文件夹的位置，请勿修改
+# 日志文件夹的位置，请尽量不要修改
 PATH_LOGGING = "gpt_log"
 
 
-# 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
+# 存储翻译好的arxiv论文的路径，请尽量不要修改
+ARXIV_CACHE_DIR = "gpt_log/arxiv_cache"
+
+
+# 除了连接OpenAI之外，还有哪些场合允许使用代理，请尽量不要修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
-
-
-# *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
-BLOCK_INVALID_APIKEY = False
 
 
 # 启用插件热加载
@@ -379,6 +393,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 
 
 插件在线服务配置依赖关系示意图
+│
+├── 互联网检索
+│   └── SEARXNG_URL
 │
 ├── 语音功能
 │   ├── ENABLE_AUDIO

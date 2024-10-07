@@ -417,6 +417,9 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     yield from update_ui(chatbot=chatbot, history=history, msg=error_msg)
                     return
 
+        # After the stream is complete, update with a completion message
+        yield from update_ui(chatbot=chatbot, history=history, msg="响应已完成")
+
         # If no content was added to the buffer, update with a default response
         if not gpt_replying_buffer.strip():
             chatbot[-1] = (inputs, "未能获取有效响应。请稍后再试。")

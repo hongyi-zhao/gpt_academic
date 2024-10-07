@@ -384,69 +384,44 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         gpt_replying_buffer = ""
         is_head_of_the_stream = True
         stream_response =  response.iter_lines()
-        while True:
-            try:
-                chunk = next(stream_response)
-            except StopIteration:
-                # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
-                chunk_decoded = chunk.decode()
-                error_msg = chunk_decoded
-                # 首先排除一个one-api没有done数据包的第三方Bug情形
-                if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
-                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
-                    break
-                # 其他情况，直接返回报错
-                chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
-                return
-
-            # 提前读取一些信息 （用于判断异常）
-            chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
-
-            if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
-                # 数据流的第一帧不携带content
-                is_head_of_the_stream = False; continue
-
+        for chunk in stream_response:
             if chunk:
                 try:
-                    if has_choices and not choice_valid:
-                        # 一些垃圾第三方接口的出现这样的错误
-                        continue
-                    if ('data: [DONE]' not in chunk_decoded) and len(chunk_decoded) > 0 and (chunkjson is None):
-                        # 传递进来一些奇怪的东西
-                        raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
-                    # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
-                        # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
-                        break
-                    # 处理数据流的主体
-                    status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
-                    # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
-                    if has_content:
-                        # 正常情况
-                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
-                    elif has_role:
-                        # 一些第三方接口的出现这样的错误，兼容一下吧
-                        continue
-                    else:
-                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
-                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
-                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+                    chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
+                    # For debug
+                    # print(f"Decoded Chunk: {chunk_decoded}")
 
-                    history[-1] = gpt_replying_buffer
-                    chatbot[-1] = (history[-2], history[-1])
-                    yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
+                    # Skip chunks that do not contain content
+                    if not has_choices or not choice_valid:
+                        continue
+
+                    # Skip empty content updates and move to meaningful responses
+                    if 'delta' in chunkjson['choices'][0] and len(chunkjson['choices'][0]['delta']) == 0:
+                        continue
+
+                    # Handle content
+                    if has_content and 'content' in chunkjson['choices'][0]["delta"]:
+                        content = chunkjson['choices'][0]["delta"]["content"]
+                        if content:
+                            gpt_replying_buffer += content
+                            history[-1] = gpt_replying_buffer
+                            chatbot[-1] = (history[-2], history[-1])
+                            yield from update_ui(chatbot=chatbot, history=history, msg="Data stream updating")
+                    elif has_role:
+                        # Handle only role information - generally not needed to update
+                        continue
+
                 except Exception as e:
-                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
-                    chunk = get_full_error(chunk, stream_response)
-                    chunk_decoded = chunk.decode()
-                    error_msg = chunk_decoded
-                    chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
-                    logger.error(error_msg)
+                    error_msg = f"Json解析异常: {str(e)}"
+                    print(error_msg)
+                    yield from update_ui(chatbot=chatbot, history=history, msg=error_msg)
                     return
-        return  # return from stream-branch
+
+        # If no content was added to the buffer, update with a default response
+        if not gpt_replying_buffer.strip():
+            chatbot[-1] = (inputs, "未能获取有效响应。请稍后再试。")
+            yield from update_ui(chatbot=chatbot, history=history, msg="未能获取有效响应")
+    return
 
 def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):
     try:

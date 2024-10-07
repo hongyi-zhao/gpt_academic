@@ -308,6 +308,10 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
+    # Add max_tokens to llm_kwargs if it's not already present
+    if 'max_tokens' not in llm_kwargs:
+        llm_kwargs['max_tokens'] = 1024 * 4  # You can adjust this default value as needed
+
     # 多模态模型
     has_multimodal_capacity = model_info[llm_kwargs['llm_model']].get('has_multimodal_capacity', False)
     if has_multimodal_capacity:
@@ -602,6 +606,7 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
     payload = {
         "model": model,
         "messages": messages,
+        "max_tokens": llm_kwargs.get('max_tokens', 1024 * 4),  # You can adjust this default value as needed        
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
         "n": 1,

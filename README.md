@@ -1,9 +1,14 @@
 > [!IMPORTANT]
-> 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/file/d/19U_hsLoMrjOlQSzYS3pzWX9fTzyusArP/view?usp=sharing)的文件服务器  
-> 2024.10.8: 版本3.90加入对llama-index的初步支持，版本3.80加入插件二级菜单功能（详见wiki）  
+> `master主分支`最新动态(2025.3.2): 修复大量代码typo / 联网组件支持Jina的api / 增加deepseek-r1支持  
+> `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
+> `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
+>
+> 2025.2.2: 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)  
+> 2025.2.1: 支持自定义字体  
+> 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/drive/folders/14kR-3V-lIbvGxri4AHc8TpiA1fqsw7SK?usp=sharing)的文件服务器  
 > 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
 > 2024.3.11: 全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！ SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/) 
-> 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
+> 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。
 
 <br>
 
@@ -124,20 +129,20 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 
 ```mermaid
 flowchart TD
-    A{"安装方法"} --> W1("I. 🔑直接运行 (Windows, Linux or MacOS)")
-    W1 --> W11["1. Python pip包管理依赖"]
-    W1 --> W12["2. Anaconda包管理依赖（推荐⭐）"]
+    A{"安装方法"} --> W1("I 🔑直接运行 (Windows, Linux or MacOS)")
+    W1 --> W11["1 Python pip包管理依赖"]
+    W1 --> W12["2 Anaconda包管理依赖（推荐⭐）"]
 
-    A --> W2["II. 🐳使用Docker (Windows, Linux or MacOS)"]
+    A --> W2["II 🐳使用Docker (Windows, Linux or MacOS)"]
 
-    W2 --> k1["1. 部署项目全部能力的大镜像（推荐⭐）"]
-    W2 --> k2["2. 仅在线模型（GPT, GLM4等）镜像"]
-    W2 --> k3["3. 在线模型 + Latex的大镜像"]
+    W2 --> k1["1 部署项目全部能力的大镜像（推荐⭐）"]
+    W2 --> k2["2 仅在线模型（GPT, GLM4等）镜像"]
+    W2 --> k3["3 在线模型 + Latex的大镜像"]
 
-    A --> W4["IV. 🚀其他部署方法"]
-    W4 --> C1["1. Windows/MacOS 一键安装运行脚本（推荐⭐）"]
-    W4 --> C2["2. Huggingface, Sealos远程部署"]
-    W4 --> C4["3. ... 其他 ..."]
+    A --> W4["IV 🚀其他部署方法"]
+    W4 --> C1["1 Windows/MacOS 一键安装运行脚本（推荐⭐）"]
+    W4 --> C2["2 Huggingface, Sealos远程部署"]
+    W4 --> C4["3 其他 ..."]
 ```
 
 ### 安装方法I：直接运行 (Windows, Linux or MacOS)
@@ -170,26 +175,32 @@ flowchart TD
     ```
 
 
-<details><summary>如果需要支持清华ChatGLM2/复旦MOSS/RWKV作为后端，请点击展开此处</summary>
+<details><summary>如果需要支持清华ChatGLM系列/复旦MOSS/RWKV作为后端，请点击展开此处</summary>
 <p>
 
-【可选步骤】如果需要支持清华ChatGLM3/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
+【可选步骤】如果需要支持清华ChatGLM系列/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 
 ```sh
 # 【可选步骤I】支持清华ChatGLM3。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 python -m pip install -r request_llms/requirements_chatglm.txt
 
-# 【可选步骤II】支持复旦MOSS
+# 【可选步骤II】支持清华ChatGLM4 注意：此模型至少需要24G显存
+python -m pip install -r request_llms/requirements_chatglm4.txt
+# 可使用modelscope下载ChatGLM4模型
+# pip install modelscope
+# modelscope download --model ZhipuAI/glm-4-9b-chat --local_dir ./THUDM/glm-4-9b-chat
+
+# 【可选步骤III】支持复旦MOSS
 python -m pip install -r request_llms/requirements_moss.txt
 git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss  # 注意执行此行代码时，必须处于项目根路径
 
-# 【可选步骤III】支持RWKV Runner
+# 【可选步骤IV】支持RWKV Runner
 参考wiki：https://github.com/binary-husky/gpt_academic/wiki/%E9%80%82%E9%85%8DRWKV-Runner
 
-# 【可选步骤IV】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
+# 【可选步骤V】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
-# 【可选步骤V】支持本地模型INT8,INT4量化（这里所指的模型本身不是量化版本，目前deepseek-coder支持，后面测试后会加入更多模型量化选择）
+# 【可选步骤VI】支持本地模型INT8,INT4量化（这里所指的模型本身不是量化版本，目前deepseek-coder支持，后面测试后会加入更多模型量化选择）
 pip install bitsandbyte
 # windows用户安装bitsandbytes需要使用下面bitsandbytes-windows-webui
 python -m pip install bitsandbytes --prefer-binary --extra-index-url=https://jllllll.github.io/bitsandbytes-windows-webui
@@ -417,7 +428,6 @@ timeline LR
 1. `master` 分支: 主分支，稳定版
 2. `frontier` 分支: 开发分支，测试版
 3. 如何[接入其他大模型](request_llms/README.md)
-4. 访问GPT-Academic的[在线服务并支持我们](https://github.com/binary-husky/gpt_academic/wiki/online)
 
 ### V：参考与学习
 

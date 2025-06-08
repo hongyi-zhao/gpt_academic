@@ -87,21 +87,6 @@ js_code_for_toggle_darkmode = """() => {
 }"""
 
 
-js_code_for_persistent_cookie_init = """(web_cookie_cache, cookie) => {
-    return [getCookie("web_cookie_cache"), cookie];
-}
-"""
-
-# 详见 themes/common.js
-js_code_reset = """
-(a,b,c)=>{
-    let stopButton = document.getElementById("elem_stop");
-    stopButton.click();
-    return reset_conversation(a,b);
-}
-"""
-
-
 js_code_clear = """
 (a,b)=>{
     return ["", ""];
@@ -156,23 +141,3 @@ setTimeout(() => {
 }
 """
 
-
-
-js_code_show_or_hide_group2 = """
-(display_panel_arr)=>{
-setTimeout(() => {
-    display_panel_arr = get_checkbox_selected_items("cbsc");
-
-    let searchString = "添加Live2D形象";
-    let ele = "none";
-    if (display_panel_arr.includes(searchString)) {
-        setCookie("js_live2d_show_cookie", "True", 365);
-        loadLive2D();
-    } else {
-        setCookie("js_live2d_show_cookie", "False", 365);
-        $('.waifu').hide();
-    }
-
-}, 50);
-}
-"""
